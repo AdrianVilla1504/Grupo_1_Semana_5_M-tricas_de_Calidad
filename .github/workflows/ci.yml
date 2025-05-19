@@ -24,21 +24,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download ChromeDriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
-          unzip chromedriver.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
-
       - name: Install Google Chrome
         run: |
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)/chromedriver_linux64.zip" || wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+
       - name: Run tests with pytest
+        env:
+          PATH: /usr/local/bin:$PATH
         run: pytest --cov=utils --cov=tests
 
       - name: Upload coverage report
