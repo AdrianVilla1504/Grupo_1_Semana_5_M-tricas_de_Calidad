@@ -32,10 +32,21 @@ jobs:
           sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
+      
+      - name: Install ChromeDriver
+        run: |
+          wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+          which chromedriver
+          chromedriver --version
 
       - name: Run tests with pytest
+        env:
+          PATH: /usr/local/bin:$PATH
         run: pytest --cov=utils --cov=tests
-
+        
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
